@@ -2,7 +2,7 @@
 # It will check if the current month's payslip is available on Hilan
 # If it is, it will send a notification to the user
 # The cronjob should be something like (every 5 minutes):
-# */5 * * * * cd /Users/gtelem/pgit/HilanSelenium ; /usr/bin/env /Users/gtelem/pgit/HilanSelenium/venv/bin/python /Users/gtelem/pgit/HilanSelenium/hilan.py 2>&1 > /Users/gtelem/pgit/HilanSelenium/last_run_logs.txt
+# */5 * * * * cd /Users/gtelem/pgit/HilanSelenium ; /usr/bin/env /Users/gtelem/pgit/HilanSelenium/venv/bin/python /Users/gtelem/pgit/HilanSelenium/hilan.py 2>&1 > last_run_logs.txt
 
 import time
 import os
@@ -121,5 +121,5 @@ if (len(available_months)) == current_month:
         f.write(f'{current_month}')
 else:
     pass
-    os.system(f"""osascript -e 'display notification "❌ Hilan last payslip month is ({len(available_months)})" with title "Hilan Payslip Watch"'""")
+    os.system(f"""osascript -e 'display notification "❌ Hilan last payslip month is {len(available_months)}" with title "Hilan Payslip Watch"'""")
 
