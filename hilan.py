@@ -2,7 +2,7 @@
 # It will check if the current month's payslip is available on Hilan
 # If it is, it will send a notification to the user
 # The cronjob should be something like (every 5 minutes):
-# */5 * * * * cd /Users/gtelem/pgit/HilanSelenium ; /usr/bin/env /Users/gtelem/pgit/HilanSelenium/venv/bin/python /Users/gtelem/pgit/HilanSelenium/hilan.py
+# */5 * * * * cd /Users/gtelem/pgit/HilanSelenium ; /usr/bin/env /Users/gtelem/pgit/HilanSelenium/venv/bin/python /Users/gtelem/pgit/HilanSelenium/hilan.py 2>&1 > /Users/gtelem/pgit/HilanSelenium/last_run_logs.txt
 
 import time
 import os

@@ -1,0 +1,5 @@
+**/creds.json
+hilan.txt
+last_run_logs.log
+venv/
+.vscode/
