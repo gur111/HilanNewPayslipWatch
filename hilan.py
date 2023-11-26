@@ -1,8 +1,8 @@
 # This file is meant to be called by a cron job
 # It will check if the current month's payslip is available on Hilan
 # If it is, it will send a notification to the user
-# The cronjob should be something like (every 30 minutes):
-# */30 * * * * cd /Users/gtelem/pgit/HilanSelenium ; /usr/bin/env venv/bin/python hilan.py
+# The cronjob should be something like (every 15 minutes):
+# */15 * * * * cd <path_to_repo> ; /usr/bin/env venv/bin/python hilan.py
 
 import time
 import os
@@ -16,7 +16,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium import webdriver
 # Add logging to file
 import logging
-logging.basicConfig(filename='last_run_logs.log', level=logging.INFO, format='%(asctime)s %(message)s')
+# Config the log to include the time, level, and message
+logging.basicConfig(filename='last_run_logs.log', level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
 
 file_indicator = 'hilan.txt'
