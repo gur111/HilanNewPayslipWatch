@@ -34,6 +34,7 @@ if os.path.exists(file_indicator):
             exit(0)
 
 options = Options()
+options.add_argument('-headless')
 options.headless = True
 
 logging.info(f'Checking if payslip is available for month {current_month}')
