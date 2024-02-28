@@ -123,7 +123,7 @@ if (len(available_months)) == current_month:
             if f.read() == f'{current_month}':
                 exit(0)
     os.system(f"""osascript -e 'display notification "✅💵💰 Hilan has this month: {len(available_months)}'"'"'s payslip" with title "Hilan Payslip Watch" sound name "Submarine"'""")
-    os.system(f'''osascript -e 'tell application "Shortcuts Events" to run the shortcut named "Send Payslip Notification Email"' ''')
+    os.system(f'''osascript -e 'tell application "Shortcuts Events" to run the shortcut named "Send Payslip Notification Message"' ''')
     # Save an indication that we found this month's payslip already
     with open(file_indicator, 'w') as f:
         f.write(f'{current_month}')
