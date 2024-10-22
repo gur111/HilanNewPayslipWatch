@@ -1,8 +1,8 @@
 # This file is meant to be called by a cron job
 # It will check if the current month's payslip is available on Hilan
 # If it is, it will send a notification to the user
-# The cronjob should be something like (every 15 minutes):
-# */15 * * * * cd <path_to_repo> ; /usr/bin/env venv/bin/python hilan.py
+# The cronjob should be something like (every 5 minutes):
+# */5 * * * * cd <path_to_repo> ; OP_SERVICE_ACCOUNT_TOKEN=<token> /usr/bin/env venv/bin/python hilan.py
 
 from subprocess import check_output
 import os
@@ -11,8 +11,9 @@ from datetime import datetime
 import logging
 from curl_cffi import requests
 
+base_dir = os.path.dirname(os.path.realpath(__file__))
 # Config the log to include the time, level, and message
-logging.basicConfig(filename='last_run_logs.log', level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+logging.basicConfig(filename=os.path.join(base_dir, 'last_run_logs.log'), level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 file_indicator = 'hilan.txt'
 current_month = datetime.now().month
 
@@ -76,12 +77,13 @@ def persist_current_month_as_reported():
     with open(file_indicator, 'w') as f:
         f.write(f'{current_month}')
 
+    logging.info(f'Persisted {current_month} was reported to {os.path.realpath(file_indicator)}')
 
 def report_current_month():
     os.system(
         f"""osascript -e 'display notification "✅💵💰 Hilan has this month: {current_month}'"'"'s payslip" with title "Hilan Payslip Watch" sound name "Submarine"'""")
-    # os.system(f'''osascript -e 'tell application "Shortcuts Events" to run the shortcut named "Send Payslip Notification Message"' ''')
-
+    os.system(f'''osascript -e 'tell application "Shortcuts Events" to run the shortcut named "Send Payslip Notification Message"' ''')
+    logging.info(f'Notified users and showed notification for {current_month}')
     persist_current_month_as_reported()
 
 
@@ -97,8 +99,12 @@ def get_password():
     if 'password' in creds:
         password = creds['password']
     else:
-        onepass_output = check_output(f"op item get {creds['1pass_item_id']} --fields label=username,label=password", shell=True).decode()
-        password = onepass_output[onepass_output.find(',') + 1:].strip()
+        # signin_out = os.system('/opt/homebrew/bin/op signin')
+        # logging.info(f'Signin result: {signin_out}')
+        cmd = f"/opt/homebrew/bin/op read op://BotVault/xivvgkinxcst7rm5rl7q5kovsu/password"
+        # logging.info(f'Checking pass using: {cmd}')
+        onepass_output = check_output(cmd, shell=True).decode()
+        password = onepass_output.strip()
 
     return password
 
@@ -116,6 +122,7 @@ def is_new_payslip_available():
 def main():
     if is_new_payslip_available():
         report_current_month()
+        return
 
 
 if __name__ == '__main__':
