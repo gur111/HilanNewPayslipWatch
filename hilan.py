@@ -4,16 +4,18 @@
 # The cronjob should be something like (every 5 minutes):
 # */5 * * * * cd <path_to_repo> ; OP_SERVICE_ACCOUNT_TOKEN=<token> /usr/bin/env venv/bin/python hilan.py
 
-from subprocess import check_output
-import os
 import json
-from datetime import datetime
 import logging
+import os
+from datetime import datetime
+from subprocess import check_output
+
 from curl_cffi import requests
 
 base_dir = os.path.dirname(os.path.realpath(__file__))
 # Config the log to include the time, level, and message
-logging.basicConfig(filename=os.path.join(base_dir, 'last_run_logs.log'), level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+logging.basicConfig(filename=os.path.join(base_dir, 'last_run_logs.log'), level=logging.INFO,
+                    format='%(asctime)s %(levelname)s %(message)s')
 file_indicator = 'hilan.txt'
 current_month = datetime.now().month
 
@@ -30,6 +32,10 @@ def login():
     response = session.post(url, headers=headers, data=payload, max_redirects=3, timeout=5).json()
     if response['IsFail']:
         logging.error(f'Login error: {response}')
+        if response['IsShowCaptcha']:
+            send_captcha_notification()
+        else:
+            send_error_message(response)
         return None
 
     return session
@@ -57,7 +63,8 @@ def is_current_month_available():
     if data['Month'] == current_month:
         ans = True
 
-    logging.info(f'Is new payslip is available for month {current_month}? {"Yes" if ans else "No"} (last = {data["Month"]})')
+    logging.info(
+        f'Is new payslip is available for month {current_month}? {"Yes" if ans else "No"} (last = {data["Month"]})')
     return ans
 
 
@@ -79,12 +86,30 @@ def persist_current_month_as_reported():
 
     logging.info(f'Persisted {current_month} was reported to {os.path.realpath(file_indicator)}')
 
+
 def report_current_month():
     os.system(
         f"""osascript -e 'display notification "✅💵💰 Hilan has this month: {current_month}'"'"'s payslip" with title "Hilan Payslip Watch" sound name "Submarine"'""")
-    os.system(f'''osascript -e 'tell application "Shortcuts Events" to run the shortcut named "Send Payslip Notification Message"' ''')
+    os.system(
+        f'''osascript -e 'tell application "Shortcuts Events" to run the shortcut named "Send Payslip Notification Message"' ''')
     logging.info(f'Notified users and showed notification for {current_month}')
     persist_current_month_as_reported()
+
+
+def send_error_message(msg):
+    os.system(
+        f"""osascript -e 'display notification "❌💵💰 Error checking Hilan" with title "Hilan Payslip Watch Error" sound name "Submarine"'""")
+    os.system(
+        f'''osascript -e 'tell application "Shortcuts Events" to run the shortcut named "Send Payslip Notification Error"' ''')
+    logging.info(f'Notified maintainer about error: {msg}')
+
+
+def send_captcha_notification():
+    os.system(
+        f"""osascript -e 'display notification "❌💵💰 Got captcha on Hilan" with title "Hilan Needs Captcha" sound name "Submarine"'""")
+    os.system(
+        f'''osascript -e 'tell application "Shortcuts Events" to run the shortcut named "Send Payslip Notification Captcha"' ''')
+    logging.info(f'Notified maintainer about captcha')
 
 
 def get_password():
